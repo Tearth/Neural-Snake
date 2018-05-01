@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using AForge.Neuro;
 using NeuralSnake.AI;
 
 namespace NeuralSnake
@@ -32,7 +26,7 @@ namespace NeuralSnake
 
         private void StartButton_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < 20; i++)
+            for (var i = 0; i < 20; i++)
             {
                 _boards.Add(new Board(25, 20, 10, 1));
                 Invoke(new Action(() => BoardsListBox.Items.Add("")));
@@ -43,7 +37,7 @@ namespace NeuralSnake
 
         private void TurnTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            for(int i=0; i<_boards.Count; i++)
+            for(var i=0; i<_boards.Count; i++)
             {
                 if (_boards[i].GameState == GameState.Waiting || _boards[i].GameState == GameState.Running)
                 {

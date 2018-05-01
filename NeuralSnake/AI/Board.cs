@@ -107,7 +107,10 @@ namespace NeuralSnake.AI
 
         private void UpdateSnake()
         {
-            if (Direction == Direction.None) return;
+            if (Direction == Direction.None)
+            {
+                return;
+            }
 
             var updatedHeadPos = _snake[0];
             switch (Direction)
