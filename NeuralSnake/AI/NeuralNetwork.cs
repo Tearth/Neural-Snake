@@ -37,6 +37,28 @@ namespace NeuralSnake.AI
             return (Direction)maxIndex + 1;
         }
 
+        public ActivationNetwork Clone()
+        {
+            var clonedNeuralNetwork = new ActivationNetwork(new BipolarSigmoidFunction(0.5), 4, 8, 4);
+            for(var l=0; l<_network.Layers.Length; l++)
+            {
+                var layer = _network.Layers[l];
+                for(var n=0; n<layer.Neurons.Length; n++)
+                {
+                    var neuron = (ActivationNeuron)layer.Neurons[n];
+
+                    for (var w = 0; w < neuron.Weights.Length; w++)
+                    {
+                        var clonedNeuron = (ActivationNeuron)clonedNeuralNetwork.Layers[l].Neurons[n];
+                        clonedNeuron.Weights[w] = neuron.Weights[w];
+                        clonedNeuron.Threshold = neuron.Threshold;
+                    }
+                }
+            }
+
+            return clonedNeuralNetwork;
+        }
+
         private double GetFieldValue(FieldType type)
         {
             return Convert.ToDouble(type == FieldType.Empty || type == FieldType.Food);
