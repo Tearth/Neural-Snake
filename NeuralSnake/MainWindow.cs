@@ -21,9 +21,9 @@ namespace NeuralSnake
         {
             InitializeComponent();
 
-            _board = new Board(25, 15, 1, 10);
+            _board = new Board(25, 15, 5, 3);
 
-            _turnTimer = new System.Timers.Timer(300);
+            _turnTimer = new System.Timers.Timer(200);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
         }
 
@@ -41,6 +41,7 @@ namespace NeuralSnake
         private void Redraw()
         {
             var g = GraphicArea.CreateGraphics();
+
             var fieldWidth = GraphicArea.Size.Width / _board.Width;
             var fieldHeight = GraphicArea.Size.Height / _board.Height;
 
@@ -60,14 +61,26 @@ namespace NeuralSnake
         {
             switch (type)
             {
-                case FieldType.Empty: return Color.Transparent;
+                case FieldType.Empty: return Color.White;
                 case FieldType.Head: return Color.Green;
-                case FieldType.Body: return Color.White;
+                case FieldType.Body: return Color.Brown;
                 case FieldType.Food: return Color.Blue;
                 case FieldType.Wall: return Color.Violet;
             }
 
             return Color.Black;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var q = _board.Direction;
+            if (q == Direction.None) q = Direction.Up;
+            else if (q == Direction.Up) q = Direction.Right;
+            else if(q == Direction.Right) q = Direction.Down;
+            else if (q == Direction.Down) q = Direction.Left;
+            else  if (q == Direction.Left) q = Direction.Up;
+
+            _board.Direction = (Direction)q;
         }
     }
 }

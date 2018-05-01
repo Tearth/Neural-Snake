@@ -46,7 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\Board.cs" />
+    <Compile Include="AI\Direction.cs" />
     <Compile Include="AI\FieldType.cs" />
+    <Compile Include="AI\GameState.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
