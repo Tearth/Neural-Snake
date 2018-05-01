@@ -10,11 +10,14 @@ namespace NeuralSnake.AI
 {
     public class NeuralNetwork
     {
+        public double[] LastInput { get; private set; }
+        public double[] LastOutput { get; private set; }
+
         private ActivationNetwork _network;
 
         public NeuralNetwork()
         {
-            _network = new ActivationNetwork(new SigmoidFunction(), 4, 8, 4);
+            _network = new ActivationNetwork(new BipolarSigmoidFunction(0.5), 4, 8, 4);
         }
 
         public Direction Calculate(FieldType[,] board, Point head)
@@ -30,6 +33,9 @@ namespace NeuralSnake.AI
             var output = _network.Compute(input).ToList();
             var maxValue = output.Max();
             var maxIndex = output.IndexOf(maxValue);
+
+            LastInput = input;
+            LastOutput = _network.Output;
 
             return (Direction)maxIndex + 1;
         }

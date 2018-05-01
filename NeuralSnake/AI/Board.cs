@@ -11,7 +11,11 @@ namespace NeuralSnake.AI
         public int Width { get; }
         public int Height { get; }
         public int Turn { get; private set; }
+        public int Score { get; private set; }
         public Direction Direction { get; set; }
+
+        public double[] LastInput => _neuralNetwork.LastInput;
+        public double[] LastOutput => _neuralNetwork.LastOutput;
 
         private NeuralNetwork _neuralNetwork;
         private FieldType[,] _board;
@@ -64,6 +68,7 @@ namespace NeuralSnake.AI
             }
 
             Turn++;
+            Score++;
         }
 
         public FieldType[,] GetAll()

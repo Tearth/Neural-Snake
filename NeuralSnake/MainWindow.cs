@@ -15,14 +15,16 @@ namespace NeuralSnake
 {
     public partial class MainWindow : Form
     {
-        private Board _board;
+        private List<Board> _boards;
         private System.Timers.Timer _turnTimer;
+
+        private int _selectedBoard;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _board = new Board(25, 15, 10, 1);
+            _boards = new List<Board>();
 
             _turnTimer = new System.Timers.Timer(200);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
@@ -30,21 +32,41 @@ namespace NeuralSnake
 
         private void StartButton_Click(object sender, EventArgs e)
         {
+            for (int i = 0; i < 20; i++)
+            {
+                _boards.Add(new Board(25, 20, 10, 1));
+                Invoke(new Action(() => BoardsListBox.Items.Add("")));
+            }
+
             _turnTimer.Start();
         }
 
         private void TurnTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            
-                var test = new ActivationNetwork(new SigmoidFunction(), 3, 4);
-                var w = test.Compute(new[] { -1.0d, -1.0d, 1.0d }).ToList();
+            for(int i=0; i<_boards.Count; i++)
+            {
+                if (_boards[i].GameState == GameState.Waiting || _boards[i].GameState == GameState.Running)
+                {
+                    _boards[i].NextTurn();
+                }
 
-                var max = w.Max();
-                var i = w.IndexOf(max);
+                var item = $"{_boards[i].GameState}, {_boards[i].Score}";
+                Invoke(new Action(() => BoardsListBox.Items[i] = item));
+            }
 
-                _board.Direction = (Direction)i + 1;
+            var lastInput = _boards[_selectedBoard].LastInput;
+            var lastOutput = _boards[_selectedBoard].LastOutput;
 
-            _board.NextTurn();
+            Invoke(new Action(() => InputTopLabel.Text =        $"Top: {lastInput[0]}"));
+            Invoke(new Action(() => InputRightLabel.Text =      $"Rig: {lastInput[1]}"));
+            Invoke(new Action(() => InputBottomLabel.Text =     $"Bot: {lastInput[2]}"));
+            Invoke(new Action(() => InputLeftLabel.Text =       $"Lef: {lastInput[3]}"));
+
+            Invoke(new Action(() => OutputTopLabel.Text =       $"Top: {lastOutput[0]:0.000}"));
+            Invoke(new Action(() => OutputRightLabel.Text =     $"Rig: {lastOutput[1]:0.000}"));
+            Invoke(new Action(() => OutputBottomLabel.Text =    $"Bot: {lastOutput[2]:0.000}"));
+            Invoke(new Action(() => OutputLeftLabel.Text =      $"Lef: {lastOutput[3]:0.000}"));
+
             Redraw();
         }
 
@@ -52,14 +74,14 @@ namespace NeuralSnake
         {
             var g = GraphicArea.CreateGraphics();
 
-            var fieldWidth = GraphicArea.Size.Width / _board.Width;
-            var fieldHeight = GraphicArea.Size.Height / _board.Height;
+            var fieldWidth = GraphicArea.Size.Width / _boards[_selectedBoard].Width;
+            var fieldHeight = GraphicArea.Size.Height / _boards[_selectedBoard].Height;
 
-            for (var x = 0; x < _board.Width; x++)
+            for (var x = 0; x < _boards[_selectedBoard].Width; x++)
             {
-                for (var y = 0; y < _board.Height; y++)
+                for (var y = 0; y < _boards[_selectedBoard].Height; y++)
                 {
-                    var color = GetFieldColor(_board[x, y]);
+                    var color = GetFieldColor(_boards[_selectedBoard][x, y]);
                     var brush = new SolidBrush(color);
 
                     g.FillRectangle(brush, x * fieldWidth, y * fieldHeight, fieldWidth, fieldHeight);
@@ -79,6 +101,15 @@ namespace NeuralSnake
             }
 
             return Color.Black;
+        }
+
+        private void BoardsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var index = BoardsListBox.IndexFromPoint(e.Location);
+            if (index != ListBox.NoMatches)
+            {
+                _selectedBoard = index;
+            }
         }
     }
 }
