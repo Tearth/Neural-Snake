@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
+            this.GameAreaPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // label1
@@ -40,12 +41,21 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Score: 0";
             // 
+            // GameAreaPanel
+            // 
+            this.GameAreaPanel.Location = new System.Drawing.Point(12, 25);
+            this.GameAreaPanel.Name = "GameAreaPanel";
+            this.GameAreaPanel.Size = new System.Drawing.Size(340, 340);
+            this.GameAreaPanel.TabIndex = 1;
+            // 
             // GameWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(240, 261);
+            this.ClientSize = new System.Drawing.Size(363, 374);
+            this.Controls.Add(this.GameAreaPanel);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "GameWindow";
             this.Text = "GameWindow";
             this.ResumeLayout(false);
@@ -56,5 +66,6 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Panel GameAreaPanel;
     }
 }

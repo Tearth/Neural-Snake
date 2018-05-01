@@ -16,5 +16,11 @@ namespace NeuralSnake
         {
             InitializeComponent();
         }
+
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+            var gameWindow = new GameWindow(20);
+            gameWindow.Show();
+        }
     }
 }

@@ -2,6 +2,8 @@
 {
     public class Board
     {
+        public int Size { get; }
+
         private FieldType[,] _board;
 
         public FieldType this[int x, int y]
@@ -10,9 +12,10 @@
             set => _board[x, y] = value;
         }
 
-        public void Init(int size)
+        public Board(int size)
         {
             _board = new FieldType[size, size];
+            Size = size;
 
             for (var i = 0; i < size; i++)
             {
