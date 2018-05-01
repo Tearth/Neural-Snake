@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using AForge.Neuro;
 using NeuralSnake.AI;
 
 namespace NeuralSnake
@@ -21,7 +22,7 @@ namespace NeuralSnake
         {
             InitializeComponent();
 
-            _board = new Board(25, 15, 5, 3);
+            _board = new Board(25, 15, 10, 1);
 
             _turnTimer = new System.Timers.Timer(200);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
@@ -34,6 +35,15 @@ namespace NeuralSnake
 
         private void TurnTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            
+                var test = new ActivationNetwork(new SigmoidFunction(), 3, 4);
+                var w = test.Compute(new[] { -1.0d, -1.0d, 1.0d }).ToList();
+
+                var max = w.Max();
+                var i = w.IndexOf(max);
+
+                _board.Direction = (Direction)i + 1;
+
             _board.NextTurn();
             Redraw();
         }
@@ -62,25 +72,13 @@ namespace NeuralSnake
             switch (type)
             {
                 case FieldType.Empty: return Color.White;
-                case FieldType.Head: return Color.Green;
-                case FieldType.Body: return Color.Brown;
+                case FieldType.Head: return Color.Brown;
+                case FieldType.Body: return Color.Green;
                 case FieldType.Food: return Color.Blue;
-                case FieldType.Wall: return Color.Violet;
+                case FieldType.Wall: return Color.DarkSlateGray;
             }
 
             return Color.Black;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var q = _board.Direction;
-            if (q == Direction.None) q = Direction.Up;
-            else if (q == Direction.Up) q = Direction.Right;
-            else if(q == Direction.Right) q = Direction.Down;
-            else if (q == Direction.Down) q = Direction.Left;
-            else  if (q == Direction.Left) q = Direction.Up;
-
-            _board.Direction = (Direction)q;
         }
     }
 }

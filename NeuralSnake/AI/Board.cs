@@ -13,6 +13,7 @@ namespace NeuralSnake.AI
         public int Turn { get; private set; }
         public Direction Direction { get; set; }
 
+        private NeuralNetwork _neuralNetwork;
         private FieldType[,] _board;
         private int _foodInterval;
         private int _foodDensity;
@@ -22,6 +23,7 @@ namespace NeuralSnake.AI
 
         public Board(int width, int height, int foodInterval, int foodDensity)
         {
+            _neuralNetwork = new NeuralNetwork();
             _board = new FieldType[width, height];
             _foodInterval = foodInterval;
             _foodDensity = foodDensity;
@@ -53,6 +55,7 @@ namespace NeuralSnake.AI
         public void NextTurn()
         {
             GameState = GameState.Running;
+            Direction = _neuralNetwork.Calculate(_board, _snake[0]);
 
             UpdateSnake();
             if (Turn % _foodInterval == 0)
