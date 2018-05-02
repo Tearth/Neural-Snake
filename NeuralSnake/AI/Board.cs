@@ -34,7 +34,7 @@ namespace NeuralSnake.AI
             _snake = new List<Point>();
             _random = new Random();
 
-            GameState = GameState.Waiting;
+            GameState = GameState.Running;
             Width = width;
             Height = height;
             Turn = 1;
@@ -56,16 +56,22 @@ namespace NeuralSnake.AI
             _board[_snake[0].X, _snake[0].Y] = FieldType.Head;
         }
 
+        public Board Clone()
+        {
+            var clonedBoard = new Board(Width, Height, _foodInterval, _foodDensity);
+            clonedBoard._neuralNetwork = new NeuralNetwork(_neuralNetwork.Clone());
+            clonedBoard._neuralNetwork.Mutate();
+
+            return clonedBoard;
+        }
+
         public void NextTurn()
         {
             GameState = GameState.Running;
             Direction = _neuralNetwork.Calculate(_board, _snake[0]);
 
             UpdateSnake();
-            if (Turn % _foodInterval == 0)
-            {
-                AddRandomFood();
-            }
+            UpdateFood();
 
             Turn++;
             Score++;
@@ -82,8 +88,13 @@ namespace NeuralSnake.AI
             set => _board[x, y] = value;
         }
 
-        private void AddRandomFood()
+        private void UpdateFood()
         {
+            if (Turn % _foodInterval != 0)
+            {
+                return;
+            }
+
             for (var i = 0; i < _foodDensity; i++)
             {
                 var failedCount = 0;

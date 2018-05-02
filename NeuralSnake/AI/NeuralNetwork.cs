@@ -11,10 +11,16 @@ namespace NeuralSnake.AI
         public double[] LastOutput { get; private set; }
 
         private ActivationNetwork _network;
+        private static Random _random = new Random();
 
         public NeuralNetwork()
         {
-            _network = new ActivationNetwork(new BipolarSigmoidFunction(0.5), 4, 8, 4);
+            _network = new ActivationNetwork(new BipolarSigmoidFunction(0.3), 4, 10, 4);
+        }
+
+        public NeuralNetwork(ActivationNetwork neuralNetwork)
+        {
+            _network = neuralNetwork;
         }
 
         public Direction Calculate(FieldType[,] board, Point head)
@@ -39,7 +45,7 @@ namespace NeuralSnake.AI
 
         public ActivationNetwork Clone()
         {
-            var clonedNeuralNetwork = new ActivationNetwork(new BipolarSigmoidFunction(0.5), 4, 8, 4);
+            var clonedNeuralNetwork = new ActivationNetwork(new BipolarSigmoidFunction(0.3), 4, 10, 4);
             for(var l=0; l<_network.Layers.Length; l++)
             {
                 var layer = _network.Layers[l];
@@ -57,6 +63,25 @@ namespace NeuralSnake.AI
             }
 
             return clonedNeuralNetwork;
+        }
+
+        public void Mutate()
+        {
+            if (_random.NextDouble() < 0.5)
+            {
+                var mutationsCount = _random.Next(1, 4);
+                for (var i = 0; i < mutationsCount; i++)
+                {
+                    var layerIndex = _random.Next(_network.Layers.Length);
+                    var layer = _network.Layers[layerIndex];
+
+                    var neuronIndex = _random.Next(layer.Neurons.Length);
+                    var neuron = layer.Neurons[neuronIndex];
+
+                    var weightIndex = _random.Next(neuron.Weights.Length);
+                    neuron.Weights[weightIndex] = _random.NextDouble();
+                }
+            }
         }
 
         private double GetFieldValue(FieldType type)

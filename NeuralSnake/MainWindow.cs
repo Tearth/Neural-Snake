@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
 using NeuralSnake.AI;
@@ -20,7 +21,7 @@ namespace NeuralSnake
 
             _boards = new List<Board>();
 
-            _turnTimer = new System.Timers.Timer(200);
+            _turnTimer = new System.Timers.Timer(100);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
         }
 
@@ -37,9 +38,25 @@ namespace NeuralSnake
 
         private void TurnTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            for(var i=0; i<_boards.Count; i++)
+            try
             {
-                if (_boards[i].GameState == GameState.Waiting || _boards[i].GameState == GameState.Running)
+                UpdateUI();
+                Redraw();
+
+                UpdateGeneration();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
+        }
+
+        private void UpdateUI()
+        {
+            for (var i = 0; i < _boards.Count; i++)
+            {
+                if (_boards[i].GameState == GameState.Running)
                 {
                     _boards[i].NextTurn();
                 }
@@ -51,17 +68,21 @@ namespace NeuralSnake
             var lastInput = _boards[_selectedBoard].LastInput;
             var lastOutput = _boards[_selectedBoard].LastOutput;
 
-            Invoke(new Action(() => InputTopLabel.Text =        $"Top: {lastInput[0]}"));
-            Invoke(new Action(() => InputRightLabel.Text =      $"Rig: {lastInput[1]}"));
-            Invoke(new Action(() => InputBottomLabel.Text =     $"Bot: {lastInput[2]}"));
-            Invoke(new Action(() => InputLeftLabel.Text =       $"Lef: {lastInput[3]}"));
+            if (lastInput != null)
+            {
+                Invoke(new Action(() => InputTopLabel.Text = $"Top: {lastInput[0]}"));
+                Invoke(new Action(() => InputRightLabel.Text = $"Rig: {lastInput[1]}"));
+                Invoke(new Action(() => InputBottomLabel.Text = $"Bot: {lastInput[2]}"));
+                Invoke(new Action(() => InputLeftLabel.Text = $"Lef: {lastInput[3]}"));
+            }
 
-            Invoke(new Action(() => OutputTopLabel.Text =       $"Top: {lastOutput[0]:0.000}"));
-            Invoke(new Action(() => OutputRightLabel.Text =     $"Rig: {lastOutput[1]:0.000}"));
-            Invoke(new Action(() => OutputBottomLabel.Text =    $"Bot: {lastOutput[2]:0.000}"));
-            Invoke(new Action(() => OutputLeftLabel.Text =      $"Lef: {lastOutput[3]:0.000}"));
-
-            Redraw();
+            if (lastOutput != null)
+            {
+                Invoke(new Action(() => OutputTopLabel.Text = $"Top: {lastOutput[0]:0.000}"));
+                Invoke(new Action(() => OutputRightLabel.Text = $"Rig: {lastOutput[1]:0.000}"));
+                Invoke(new Action(() => OutputBottomLabel.Text = $"Bot: {lastOutput[2]:0.000}"));
+                Invoke(new Action(() => OutputLeftLabel.Text = $"Lef: {lastOutput[3]:0.000}"));
+            }
         }
 
         private void Redraw()
@@ -79,6 +100,26 @@ namespace NeuralSnake
                     var brush = new SolidBrush(color);
 
                     g.FillRectangle(brush, x * fieldWidth, y * fieldHeight, fieldWidth, fieldHeight);
+                }
+            }
+        }
+
+        private void UpdateGeneration()
+        {
+            if (_boards.TrueForAll(p => p.GameState == GameState.Done || p.Turn >= 60))
+            {
+                var sortedBoards = _boards.OrderByDescending(p => p.Score);
+                var bestBoards = sortedBoards.Take(5).ToList();
+
+                _boards.Clear();
+
+                foreach (var board in bestBoards)
+                {
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var clonedBoard = board.Clone();
+                        _boards.Add(clonedBoard);
+                    }
                 }
             }
         }

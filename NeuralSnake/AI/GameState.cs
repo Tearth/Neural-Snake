@@ -2,7 +2,6 @@
 {
     public enum GameState
     {
-        Waiting,
         Running,
         Done
     }
