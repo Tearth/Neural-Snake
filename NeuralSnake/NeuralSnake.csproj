@@ -55,7 +55,7 @@
     <Compile Include="AI\FieldType.cs" />
     <Compile Include="AI\GameSession.cs" />
     <Compile Include="AI\GameState.cs" />
-    <Compile Include="AI\NeuralNetwork.cs" />
+    <Compile Include="AI\NetworkOperations.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>

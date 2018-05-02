@@ -10,15 +10,16 @@ namespace NeuralSnake
 {
     public partial class MainWindow : Form
     {
-        private const int BoardWidth = 25;
-        private const int BoardHeight = 20;
-        private const int FoodInterval = 10;
-        private const int FoodDensity = 2;
-        private const int Neurons = 10;
-        private const float Alpha = 0.5f;
+        public const int BoardWidth = 25;
+        public const int BoardHeight = 20;
+        public const int FoodInterval = 10;
+        public const int FoodDensity = 2;
+        public const int Neurons = 3;
+        public const float Alpha = 0.5f;
 
         private List<GameSession> _sessions;
         private System.Timers.Timer _turnTimer;
+        private Random _random;
 
         private int _selectedBoard;
 
@@ -27,8 +28,9 @@ namespace NeuralSnake
             InitializeComponent();
 
             _sessions = new List<GameSession>();
+            _random = new Random();
 
-            _turnTimer = new System.Timers.Timer(100);
+            _turnTimer = new System.Timers.Timer(20);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
         }
 
@@ -72,8 +74,8 @@ namespace NeuralSnake
                 Invoke(new Action(() => BoardsListBox.Items[i] = item));
             }
 
-            var lastInput = _sessions[_selectedBoard].NeuralNetwork.LastInput;
-            var lastOutput = _sessions[_selectedBoard].NeuralNetwork.LastOutput;
+            var lastInput = _sessions[_selectedBoard].LastInput;
+            var lastOutput = _sessions[_selectedBoard].LastOutput;
 
             if (lastInput != null)
             {
@@ -115,17 +117,35 @@ namespace NeuralSnake
         {
             if (_sessions.TrueForAll(p => p.GameState == GameState.Done || p.Board.Turn >= 60))
             {
-                var sortedBoards = _sessions.OrderByDescending(p => p.Board.Score);
-                var bestBoards = sortedBoards.Take(5).ToList();
+                var sortedBoards = _sessions.OrderByDescending(p => p.Board.Score).ToList();
+
+                var bestBoards = sortedBoards.Take(3).ToList();
+                bestBoards.Add(sortedBoards[10]);
+                bestBoards.Add(sortedBoards[15]);
 
                 _sessions.Clear();
 
+                var networkOperations = new NetworkOperations();
                 foreach (var board in bestBoards)
                 {
-                    for (var i = 0; i < 4; i++)
+                    networkOperations.Mutate(board.NeuralNetwork);
+                }
+
+                foreach (var board in bestBoards)
+                {
+                    var main = new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, board.NeuralNetwork);
+                    _sessions.Add(main);
+
+                    for (var i = 0; i < 3; i++)
                     {
-                       // var clonedBoard = board.Clone();
-                       // _boards.Add(clonedBoard);
+                        var leftParent = bestBoards[_random.Next(bestBoards.Count)].NeuralNetwork;
+                        var rightParent = bestBoards[_random.Next(bestBoards.Count)].NeuralNetwork;
+
+                        var clonedNetwork = networkOperations.Breed(leftParent, rightParent);
+                        var gameSession = new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, clonedNetwork);
+
+                        networkOperations.Mutate(clonedNetwork);
+                        _sessions.Add(gameSession);
                     }
                 }
             }
