@@ -12,16 +12,19 @@ namespace NeuralSnake
     {
         public const int BoardWidth = 25;
         public const int BoardHeight = 20;
-        public const int FoodInterval = 10;
-        public const int FoodDensity = 2;
-        public const int Neurons = 3;
-        public const float Alpha = 0.5f;
+        public const int FoodInterval = 15;
+        public const int FoodDensity = 20;
+        public const int Neurons = 100;
+        public const float Alpha = 0.1f;
 
         private List<GameSession> _sessions;
         private System.Timers.Timer _turnTimer;
         private Random _random;
 
         private int _selectedBoard;
+        private int _generation;
+        private int _maxScore;
+        private int _avgScore;
 
         public MainWindow()
         {
@@ -30,15 +33,16 @@ namespace NeuralSnake
             _sessions = new List<GameSession>();
             _random = new Random();
 
-            _turnTimer = new System.Timers.Timer(20);
+            _turnTimer = new System.Timers.Timer(1);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
         }
 
         private void StartButton_Click(object sender, EventArgs e)
         {
-            for (var i = 0; i < 20; i++)
+            var seed = (int)DateTime.Now.Ticks;
+            for (var i = 0; i < 18; i++)
             {
-                _sessions.Add(new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha));
+                _sessions.Add(new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, seed));
                 Invoke(new Action(() => BoardsListBox.Items.Add("")));
             }
 
@@ -47,18 +51,21 @@ namespace NeuralSnake
 
         private void TurnTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            _turnTimer.Stop();
             try
             {
-                UpdateUI();
-                Redraw();
+                if (_sessions.Count > 0)
+                {
+                    UpdateUI();
+                    Redraw();
+                }
 
                 UpdateGeneration();
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                Console.WriteLine(exception);
-                throw;
             }
+            _turnTimer.Start();
         }
 
         private void UpdateUI()
@@ -74,28 +81,42 @@ namespace NeuralSnake
                 Invoke(new Action(() => BoardsListBox.Items[i] = item));
             }
 
-            var lastInput = _sessions[_selectedBoard].LastInput;
-            var lastOutput = _sessions[_selectedBoard].LastOutput;
-
-            if (lastInput != null)
+            if (_sessions.Count() > 0)
             {
-                Invoke(new Action(() => InputTopLabel.Text = $"Top: {lastInput[0]}"));
-                Invoke(new Action(() => InputRightLabel.Text = $"Rig: {lastInput[1]}"));
-                Invoke(new Action(() => InputBottomLabel.Text = $"Bot: {lastInput[2]}"));
-                Invoke(new Action(() => InputLeftLabel.Text = $"Lef: {lastInput[3]}"));
+                var lastInput = _sessions[_selectedBoard].LastInput;
+                var lastOutput = _sessions[_selectedBoard].LastOutput;
+
+                if (lastInput != null)
+                {
+                    Invoke(new Action(() => InputTopLabel.Text = $"Top: {lastInput[0]}"));
+                    Invoke(new Action(() => InputRightLabel.Text = $"Rig: {lastInput[1]}"));
+                    Invoke(new Action(() => InputBottomLabel.Text = $"Bot: {lastInput[2]}"));
+                    Invoke(new Action(() => InputLeftLabel.Text = $"Lef: {lastInput[3]}"));
+
+                    Invoke(new Action(() => InputFoodTopLabel.Text = $"FTo: {lastInput[4]}"));
+                    Invoke(new Action(() => InputFoodRightLabel.Text = $"FRi: {lastInput[5]}"));
+                    Invoke(new Action(() => InputFoodBottomLabel.Text = $"FBo: {lastInput[6]}"));
+                    Invoke(new Action(() => InputFoodLeftLabel.Text = $"FLe: {lastInput[7]}"));
+                }
+
+                if (lastOutput != null)
+                {
+                    Invoke(new Action(() => OutputTopLabel.Text = $"Top: {lastOutput[0]:0.000}"));
+                    Invoke(new Action(() => OutputRightLabel.Text = $"Rig: {lastOutput[1]:0.000}"));
+                    Invoke(new Action(() => OutputBottomLabel.Text = $"Bot: {lastOutput[2]:0.000}"));
+                    Invoke(new Action(() => OutputLeftLabel.Text = $"Lef: {lastOutput[3]:0.000}"));
+                }
+                Invoke(new Action(() => MaxScoreLabel.Text = $"Max score: {_maxScore}"));
+                Invoke(new Action(() => GenerationLabel.Text = $"Generation: {_generation}"));
+                Invoke(new Action(() => AvgScoreLabel.Text = $"Avg score: {_avgScore}"));
             }
 
-            if (lastOutput != null)
-            {
-                Invoke(new Action(() => OutputTopLabel.Text = $"Top: {lastOutput[0]:0.000}"));
-                Invoke(new Action(() => OutputRightLabel.Text = $"Rig: {lastOutput[1]:0.000}"));
-                Invoke(new Action(() => OutputBottomLabel.Text = $"Bot: {lastOutput[2]:0.000}"));
-                Invoke(new Action(() => OutputLeftLabel.Text = $"Lef: {lastOutput[3]:0.000}"));
-            }
         }
 
         private void Redraw()
         {
+            if (_sessions.Count == 0) return;
+
             var g = GraphicArea.CreateGraphics();
 
             var fieldWidth = GraphicArea.Size.Width / BoardWidth;
@@ -115,39 +136,42 @@ namespace NeuralSnake
 
         private void UpdateGeneration()
         {
-            if (_sessions.TrueForAll(p => p.GameState == GameState.Done || p.Board.Turn >= 60))
+            if (_sessions.Count > 0)
+            {
+                _maxScore = Math.Max(_maxScore, _sessions[0].Board.Score);
+            }
+
+            if (_sessions.Count > 0 && (_sessions.TrueForAll(p => p.GameState == GameState.Done || p.Board.Turn >= 60)))
             {
                 var sortedBoards = _sessions.OrderByDescending(p => p.Board.Score).ToList();
 
                 var bestBoards = sortedBoards.Take(3).ToList();
-                bestBoards.Add(sortedBoards[10]);
-                bestBoards.Add(sortedBoards[15]);
 
+                _avgScore = (int)_sessions.Average(p => p.Board.Score);
                 _sessions.Clear();
 
                 var networkOperations = new NetworkOperations();
-                foreach (var board in bestBoards)
-                {
-                    networkOperations.Mutate(board.NeuralNetwork);
-                }
+                var seed = (int)DateTime.Now.Ticks;
 
                 foreach (var board in bestBoards)
                 {
-                    var main = new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, board.NeuralNetwork);
+                    var main = new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, seed, board.NeuralNetwork);
                     _sessions.Add(main);
 
-                    for (var i = 0; i < 3; i++)
+                    for (var i = 0; i < 5; i++)
                     {
                         var leftParent = bestBoards[_random.Next(bestBoards.Count)].NeuralNetwork;
                         var rightParent = bestBoards[_random.Next(bestBoards.Count)].NeuralNetwork;
 
                         var clonedNetwork = networkOperations.Breed(leftParent, rightParent);
-                        var gameSession = new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, clonedNetwork);
+                        var gameSession = new GameSession(BoardWidth, BoardHeight, FoodInterval, FoodDensity, Neurons, Alpha, seed, clonedNetwork);
 
                         networkOperations.Mutate(clonedNetwork);
                         _sessions.Add(gameSession);
                     }
                 }
+
+                _generation++;
             }
         }
 

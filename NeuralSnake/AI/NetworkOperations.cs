@@ -11,8 +11,8 @@ namespace NeuralSnake.AI
     {
         private Random _random;
 
-        private const float MutationChance = 0.5f;
-        private const int MaxMutationsCount = 2;
+        private const float MutationChance = 0.3f;
+        private const int MaxMutationsCount = 20;
 
         public NetworkOperations()
         {
@@ -40,8 +40,8 @@ namespace NeuralSnake.AI
 
         public ActivationNetwork Breed(ActivationNetwork leftParent, ActivationNetwork rightParent)
         {
-            var alpha = ChooseAlpha(leftParent, rightParent);
-            var network = new ActivationNetwork(new SigmoidFunction(alpha), 4, MainWindow.Neurons, 4);
+            //var alpha = ChooseAlpha(leftParent, rightParent);
+            var network = new ActivationNetwork(new BipolarSigmoidFunction(0.5), 8, MainWindow.Neurons, 4);
 
             ChooseWeights(network, leftParent, rightParent);
             return network;
@@ -49,7 +49,7 @@ namespace NeuralSnake.AI
 
         private double ChooseAlpha(ActivationNetwork leftParent, ActivationNetwork rightParent)
         {
-            var choice = _random.Next(0, 3);
+            var choice = _random.Next(0, 2);
             var leftAlpha = GetNetworkAlpha(leftParent);
             var rightAlpha = GetNetworkAlpha(rightParent);
 
@@ -65,7 +65,7 @@ namespace NeuralSnake.AI
 
         private double GetNetworkAlpha(ActivationNetwork network)
         {
-            var function = (SigmoidFunction)((ActivationNeuron)network.Layers[0].Neurons[0]).ActivationFunction;
+            var function = (BipolarSigmoidFunction)((ActivationNeuron)network.Layers[0].Neurons[0]).ActivationFunction;
             return function.Alpha;
         }
 
@@ -84,12 +84,12 @@ namespace NeuralSnake.AI
                     for (var w = 0; w < leftNeuron.Weights.Length; w++)
                     {
                         var neuronToApply = (ActivationNeuron)network.Layers[l].Neurons[n];
+                        var random = _random.NextDouble();
+                        var range = Math.Abs(leftNeuron.Weights[w] - rightNeuron.Weights[w]);
+                        var min = Math.Min(leftNeuron.Weights[w], rightNeuron.Weights[w]);
 
-                        var weight = (leftNeuron.Weights[w] + rightNeuron.Weights[w]) / 2;
-                        var threshold = (leftNeuron.Threshold + rightNeuron.Threshold) / 2;
-
+                        var weight = random * range + min;
                         neuronToApply.Weights[w] = weight;
-                        neuronToApply.Threshold = threshold;
                     }
                 }
             }

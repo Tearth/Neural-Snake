@@ -22,7 +22,7 @@ namespace NeuralSnake.AI
 
         private Random _random;
 
-        public Board(int width, int height, int foodInterval, int foodDensity)
+        public Board(int width, int height, int foodInterval, int foodDensity, int seed)
         {
             _board = new FieldType[width, height];
             _width = width;
@@ -30,7 +30,7 @@ namespace NeuralSnake.AI
             _foodInterval = foodInterval;
             _foodDensity = foodDensity;
             _snake = new List<Point>();
-            _random = new Random();
+            _random = new Random(seed);
 
             Dead = false;
             Turn = 1;
@@ -58,7 +58,6 @@ namespace NeuralSnake.AI
             UpdateFood();
 
             Turn++;
-            Score++;
         }
 
         public FieldType[,] GetAll()
@@ -72,9 +71,34 @@ namespace NeuralSnake.AI
             set => _board[x, y] = value;
         }
 
+        public Tuple<Point, double> GetNearestFood()
+        {
+            var foodList = new List<Tuple<Point, double>>();
+
+            for (var x = 0; x < MainWindow.BoardWidth; x++)
+            {
+                for (var y = 0; y < MainWindow.BoardHeight; y++)
+                {
+                    if (_board[x, y] == FieldType.Food)
+                    {
+                        var dist = Math.Sqrt(Math.Pow(x - SnakeHead.X, 2) + Math.Pow(y - SnakeHead.Y, 2));
+                        foodList.Add(Tuple.Create(new Point(x, y), dist));
+                    }
+                }
+            }
+
+            var sortedFoodList = foodList.OrderBy(p => p.Item2);
+            if (sortedFoodList.Count() == 0)
+            {
+                return Tuple.Create(SnakeHead, 0d);
+            }
+
+            return sortedFoodList.First();
+        }
+
         private void UpdateFood()
         {
-            if (Turn % _foodInterval != 0)
+            if ((Turn - 1) % _foodInterval != 0)
             {
                 return;
             }
@@ -108,6 +132,8 @@ namespace NeuralSnake.AI
             }
 
             var updatedHeadPos = _snake[0];
+            var nearestFoodBeforeMove = GetNearestFood();
+
             switch (Direction)
             {
                 case Direction.Up:
@@ -139,6 +165,7 @@ namespace NeuralSnake.AI
             if (updatedHeadField == FieldType.Body || updatedHeadField == FieldType.Wall)
             {
                 Dead = true;
+                Score -= 50;
                 return;
             }
 
@@ -150,6 +177,20 @@ namespace NeuralSnake.AI
             {
                 _board[_snake.Last().X, _snake.Last().Y] = FieldType.Empty;
                 _snake.Remove(_snake.Last());
+            }
+            else
+            {
+                Score += 100;
+            }
+
+            var nearestFoodAfterMove = GetNearestFood();
+            if (nearestFoodAfterMove.Item2 > nearestFoodBeforeMove.Item2)
+            {
+                Score -= 15;
+            }
+            else
+            {
+                Score += 1;
             }
         }
     }

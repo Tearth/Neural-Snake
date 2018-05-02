@@ -18,15 +18,15 @@ namespace NeuralSnake.AI
         public double[] LastInput { get; private set; }
         public double[] LastOutput => NeuralNetwork.Output;
 
-        public GameSession(int width, int height, int foodInterval, int foodDensity, int neurons, float alpha)
+        public GameSession(int width, int height, int foodInterval, int foodDensity, int neurons, float alpha, int seed)
         {
-            Board = new Board(width, height, foodInterval, foodDensity);
-            NeuralNetwork = new ActivationNetwork(new SigmoidFunction(alpha), 4, neurons, 4);
+            Board = new Board(width, height, foodInterval, foodDensity, seed);
+            NeuralNetwork = new ActivationNetwork(new BipolarSigmoidFunction(alpha), 8, neurons, 4);
         }
 
-        public GameSession(int width, int height, int foodInterval, int foodDensity, int neurons, float alpha, ActivationNetwork network)
+        public GameSession(int width, int height, int foodInterval, int foodDensity, int neurons, float alpha, int seed, ActivationNetwork network)
         {
-            Board = new Board(width, height, foodInterval, foodDensity);
+            Board = new Board(width, height, foodInterval, foodDensity, seed);
             NeuralNetwork = network;
         }
 
@@ -34,24 +34,30 @@ namespace NeuralSnake.AI
         {
             if (GameState != GameState.Done)
             {
-                Board.Direction = CalculateDirection(Board, Board.SnakeHead);
+                Board.Direction = CalculateDirection();
                 Board.NextTurn();
             }
 
-            if (Board.Dead || Board.Turn >= 60)
+            if (Board.Dead || Board.Turn >= 500 || Board.Score < -80)
             {
                 GameState = GameState.Done;
             }
         }
 
-        private Direction CalculateDirection(Board board, Point head)
+        private Direction CalculateDirection()
         {
+            var nearestFood = Board.GetNearestFood();
             var input = new[]
             {
-                GetFieldValue(board[head.X, head.Y - 1]),
-                GetFieldValue(board[head.X + 1, head.Y]),
-                GetFieldValue(board[head.X, head.Y + 1]),
-                GetFieldValue(board[head.X - 1, head.Y])
+                GetFieldValue(Board[Board.SnakeHead.X, Board.SnakeHead.Y - 1]) * 2 - 1,
+                GetFieldValue(Board[Board.SnakeHead.X + 1, Board.SnakeHead.Y]) * 2 - 1,
+                GetFieldValue(Board[Board.SnakeHead.X, Board.SnakeHead.Y + 1]) * 2 - 1,
+                GetFieldValue(Board[Board.SnakeHead.X - 1, Board.SnakeHead.Y]) * 2 - 1,
+
+                Convert.ToDouble(nearestFood.Item1.Y < Board.SnakeHead.Y) * 2 - 1,
+                Convert.ToDouble(nearestFood.Item1.X > Board.SnakeHead.X) * 2 - 1,
+                Convert.ToDouble(nearestFood.Item1.Y > Board.SnakeHead.Y) * 2 - 1,
+                Convert.ToDouble(nearestFood.Item1.X < Board.SnakeHead.X) * 2 - 1
             };
 
             var output = NeuralNetwork.Compute(input).ToList();
