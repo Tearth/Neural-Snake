@@ -7,18 +7,15 @@ namespace NeuralSnake.AI
 {
     public class Board
     {
-        public GameState GameState { get; private set; }
-        public int Width { get; }
-        public int Height { get; }
         public int Turn { get; private set; }
         public int Score { get; private set; }
         public Direction Direction { get; set; }
+        public bool Dead { get; private set; }
+        public Point SnakeHead => _snake[0];
 
-        public double[] LastInput => _neuralNetwork.LastInput;
-        public double[] LastOutput => _neuralNetwork.LastOutput;
-
-        private NeuralNetwork _neuralNetwork;
         private FieldType[,] _board;
+        private int _width;
+        private int _height;
         private int _foodInterval;
         private int _foodDensity;
         private List<Point> _snake;
@@ -27,49 +24,36 @@ namespace NeuralSnake.AI
 
         public Board(int width, int height, int foodInterval, int foodDensity)
         {
-            _neuralNetwork = new NeuralNetwork();
             _board = new FieldType[width, height];
+            _width = width;
+            _height = height;
             _foodInterval = foodInterval;
             _foodDensity = foodDensity;
             _snake = new List<Point>();
             _random = new Random();
 
-            GameState = GameState.Running;
-            Width = width;
-            Height = height;
+            Dead = false;
             Turn = 1;
             Direction = Direction.None;
 
-            for (var i = 0; i < Width; i++)
+            for (var i = 0; i < _width; i++)
             {
                 _board[i, 0] = FieldType.Wall;
-                _board[i, Height - 1] = FieldType.Wall;
+                _board[i, _height - 1] = FieldType.Wall;
             }
 
-            for (var i = 0; i < Height; i++)
+            for (var i = 0; i < _height; i++)
             {
                 _board[0, i] = FieldType.Wall;
-                _board[Width - 1, i] = FieldType.Wall;
+                _board[_width - 1, i] = FieldType.Wall;
             }
 
-            _snake.Add(new Point(Width / 2, Height / 2));
+            _snake.Add(new Point(_width / 2, _height / 2));
             _board[_snake[0].X, _snake[0].Y] = FieldType.Head;
-        }
-
-        public Board Clone()
-        {
-            var clonedBoard = new Board(Width, Height, _foodInterval, _foodDensity);
-            clonedBoard._neuralNetwork = new NeuralNetwork(_neuralNetwork.Clone());
-            clonedBoard._neuralNetwork.Mutate();
-
-            return clonedBoard;
         }
 
         public void NextTurn()
         {
-            GameState = GameState.Running;
-            Direction = _neuralNetwork.Calculate(_board, _snake[0]);
-
             UpdateSnake();
             UpdateFood();
 
@@ -100,8 +84,8 @@ namespace NeuralSnake.AI
                 var failedCount = 0;
                 while (failedCount < 10)
                 {
-                    var x = _random.Next(Width - 1);
-                    var y = _random.Next(Height - 1);
+                    var x = _random.Next(_width - 1);
+                    var y = _random.Next(_height - 1);
 
                     var field = _board[x, y];
                     if (field != FieldType.Empty)
@@ -154,7 +138,7 @@ namespace NeuralSnake.AI
             var updatedHeadField = _board[updatedHeadPos.X, updatedHeadPos.Y];
             if (updatedHeadField == FieldType.Body || updatedHeadField == FieldType.Wall)
             {
-                GameState = GameState.Done;
+                Dead = true;
                 return;
             }
 

@@ -53,6 +53,7 @@
     <Compile Include="AI\Board.cs" />
     <Compile Include="AI\Direction.cs" />
     <Compile Include="AI\FieldType.cs" />
+    <Compile Include="AI\GameSession.cs" />
     <Compile Include="AI\GameState.cs" />
     <Compile Include="AI\NeuralNetwork.cs" />
     <Compile Include="MainWindow.cs">

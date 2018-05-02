@@ -11,11 +11,16 @@ namespace NeuralSnake.AI
         public double[] LastOutput { get; private set; }
 
         private ActivationNetwork _network;
+        private int _neurons;
+        private float _alpha;
+
         private static Random _random = new Random();
 
-        public NeuralNetwork()
+        public NeuralNetwork(int neurons, float alpha)
         {
-            _network = new ActivationNetwork(new BipolarSigmoidFunction(0.3), 4, 10, 4);
+            _network = new ActivationNetwork(new SigmoidFunction(alpha), 4, neurons, 4);
+            _neurons = neurons;
+            _alpha = alpha;
         }
 
         public NeuralNetwork(ActivationNetwork neuralNetwork)
@@ -23,7 +28,7 @@ namespace NeuralSnake.AI
             _network = neuralNetwork;
         }
 
-        public Direction Calculate(FieldType[,] board, Point head)
+        public Direction Calculate(Board board, Point head)
         {
             var input = new[]
             {
@@ -45,7 +50,7 @@ namespace NeuralSnake.AI
 
         public ActivationNetwork Clone()
         {
-            var clonedNeuralNetwork = new ActivationNetwork(new BipolarSigmoidFunction(0.3), 4, 10, 4);
+            var clonedNeuralNetwork = new ActivationNetwork(new BipolarSigmoidFunction(_alpha), 4, _neurons, 4);
             for(var l=0; l<_network.Layers.Length; l++)
             {
                 var layer = _network.Layers[l];
