@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AForge.Neuro;
 
 namespace NeuralSnake.AI
@@ -12,7 +8,7 @@ namespace NeuralSnake.AI
         private Random _random;
 
         private const float MutationChance = 0.3f;
-        private const int MaxMutationsCount = 20;
+        private const int MaxMutationsCount = 5;
 
         public NetworkOperations()
         {
@@ -40,8 +36,8 @@ namespace NeuralSnake.AI
 
         public ActivationNetwork Breed(ActivationNetwork leftParent, ActivationNetwork rightParent)
         {
-            //var alpha = ChooseAlpha(leftParent, rightParent);
-            var network = new ActivationNetwork(new BipolarSigmoidFunction(0.5), 8, MainWindow.Neurons, 4);
+            var alpha = ChooseAlpha(leftParent, rightParent);
+            var network = new ActivationNetwork(new BipolarSigmoidFunction(alpha), 8, MainWindow.Neurons, 4);
 
             ChooseWeights(network, leftParent, rightParent);
             return network;
@@ -49,7 +45,7 @@ namespace NeuralSnake.AI
 
         private double ChooseAlpha(ActivationNetwork leftParent, ActivationNetwork rightParent)
         {
-            var choice = _random.Next(0, 2);
+            var choice = _random.Next(0, 3);
             var leftAlpha = GetNetworkAlpha(leftParent);
             var rightAlpha = GetNetworkAlpha(rightParent);
 

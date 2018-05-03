@@ -87,8 +87,8 @@ namespace NeuralSnake.AI
                 }
             }
 
-            var sortedFoodList = foodList.OrderBy(p => p.Item2);
-            if (sortedFoodList.Count() == 0)
+            var sortedFoodList = foodList.OrderBy(p => p.Item2).ToList();
+            if (sortedFoodList.Count == 0)
             {
                 return Tuple.Create(SnakeHead, 0d);
             }
@@ -186,7 +186,7 @@ namespace NeuralSnake.AI
             var nearestFoodAfterMove = GetNearestFood();
             if (nearestFoodAfterMove.Item2 > nearestFoodBeforeMove.Item2)
             {
-                Score -= 15;
+                Score -= 5;
             }
             else
             {

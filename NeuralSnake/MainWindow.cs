@@ -13,9 +13,9 @@ namespace NeuralSnake
         public const int BoardWidth = 25;
         public const int BoardHeight = 20;
         public const int FoodInterval = 15;
-        public const int FoodDensity = 20;
-        public const int Neurons = 100;
-        public const float Alpha = 0.1f;
+        public const int FoodDensity = 5;
+        public const int Neurons = 30;
+        public const float Alpha = 0.5f;
 
         private List<GameSession> _sessions;
         private System.Timers.Timer _turnTimer;
@@ -33,7 +33,7 @@ namespace NeuralSnake
             _sessions = new List<GameSession>();
             _random = new Random();
 
-            _turnTimer = new System.Timers.Timer(1);
+            _turnTimer = new System.Timers.Timer(50);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
         }
 
@@ -52,36 +52,25 @@ namespace NeuralSnake
         private void TurnTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _turnTimer.Stop();
-            try
+            if (_sessions.Count > 0)
             {
-                if (_sessions.Count > 0)
-                {
-                    UpdateUI();
-                    Redraw();
-                }
+                UpdateUI();
+                Redraw();
+            }
 
-                UpdateGeneration();
-            }
-            catch (Exception ex)
-            {
-            }
+            UpdateGeneration();
             _turnTimer.Start();
         }
 
         private void UpdateUI()
         {
-            for(var i=0; i<_sessions.Count; i++)
+            for (var i = 0; i < _sessions.Count; i++)
             {
-                if (_sessions[i].GameState == GameState.Running)
-                {
-                    _sessions[i].NextTurn();
-                }
-
                 var item = $"{_sessions[i].GameState}, {_sessions[i].Board.Score}";
                 Invoke(new Action(() => BoardsListBox.Items[i] = item));
             }
 
-            if (_sessions.Count() > 0)
+            if (_sessions.Count > 0)
             {
                 var lastInput = _sessions[_selectedBoard].LastInput;
                 var lastOutput = _sessions[_selectedBoard].LastOutput;
@@ -115,7 +104,10 @@ namespace NeuralSnake
 
         private void Redraw()
         {
-            if (_sessions.Count == 0) return;
+            if (_sessions.Count == 0)
+            {
+                return;
+            }
 
             var g = GraphicArea.CreateGraphics();
 
@@ -136,6 +128,14 @@ namespace NeuralSnake
 
         private void UpdateGeneration()
         {
+            foreach (var session in _sessions)
+            {
+                if (session.GameState == GameState.Running)
+                {
+                    session.NextTurn();
+                }
+            }
+
             if (_sessions.Count > 0)
             {
                 _maxScore = Math.Max(_maxScore, _sessions[0].Board.Score);

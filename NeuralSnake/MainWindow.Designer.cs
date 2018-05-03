@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.StartButton = new System.Windows.Forms.Button();
-            this.StopButton = new System.Windows.Forms.Button();
             this.GraphicArea = new System.Windows.Forms.PictureBox();
             this.GenerationLabel = new System.Windows.Forms.Label();
             this.MaxScoreLabel = new System.Windows.Forms.Label();
@@ -61,15 +60,6 @@
             this.StartButton.Text = "Start";
             this.StartButton.UseVisualStyleBackColor = true;
             this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
-            // 
-            // StopButton
-            // 
-            this.StopButton.Location = new System.Drawing.Point(437, 419);
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(75, 23);
-            this.StopButton.TabIndex = 1;
-            this.StopButton.Text = "Stop";
-            this.StopButton.UseVisualStyleBackColor = true;
             // 
             // GraphicArea
             // 
@@ -277,7 +267,6 @@
             this.Controls.Add(this.MaxScoreLabel);
             this.Controls.Add(this.GenerationLabel);
             this.Controls.Add(this.GraphicArea);
-            this.Controls.Add(this.StopButton);
             this.Controls.Add(this.StartButton);
             this.Name = "MainWindow";
             this.Text = "NeuroSnake";
@@ -290,7 +279,6 @@
         #endregion
 
         private System.Windows.Forms.Button StartButton;
-        private System.Windows.Forms.Button StopButton;
         private System.Windows.Forms.PictureBox GraphicArea;
         private System.Windows.Forms.Label GenerationLabel;
         private System.Windows.Forms.Label MaxScoreLabel;
