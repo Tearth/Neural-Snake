@@ -86,6 +86,7 @@ namespace NeuralSnake.AI
 
                         var weight = random * range + min;
                         neuronToApply.Weights[w] = weight;
+                        neuronToApply.Threshold = 0;
                     }
                 }
             }

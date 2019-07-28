@@ -12,9 +12,9 @@ namespace NeuralSnake
     {
         public const int BoardWidth = 25;
         public const int BoardHeight = 20;
-        public const int FoodInterval = 15;
-        public const int FoodDensity = 5;
-        public const int Neurons = 30;
+        public const int FoodInterval = 10;
+        public const int FoodDensity = 10;
+        public const int Neurons = 100;
         public const float Alpha = 0.5f;
 
         private List<GameSession> _sessions;
@@ -33,7 +33,7 @@ namespace NeuralSnake
             _sessions = new List<GameSession>();
             _random = new Random();
 
-            _turnTimer = new System.Timers.Timer(50);
+            _turnTimer = new System.Timers.Timer(20);
             _turnTimer.Elapsed += TurnTimer_Elapsed;
         }
 
@@ -58,6 +58,7 @@ namespace NeuralSnake
                 Redraw();
             }
 
+            for(int i=0; i<1000; i++)
             UpdateGeneration();
             _turnTimer.Start();
         }
