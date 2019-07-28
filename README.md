@@ -1,7 +1,7 @@
 # NeuralSnake
 Simple experiment on neural networks playing Snake game based on evolutionary algorithms.
 
-![example screenshot](https://i.imgur.com/rfpZzpu.png)
+![example screenshot](https://i.imgur.com/2HSsIGS.png)
 
 # Neural network parameters
 **Input** (1 = yes, -1 = no):

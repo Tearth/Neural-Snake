@@ -269,7 +269,7 @@
             this.Controls.Add(this.GraphicArea);
             this.Controls.Add(this.StartButton);
             this.Name = "MainWindow";
-            this.Text = "NeuroSnake";
+            this.Text = "NeuralSnake";
             ((System.ComponentModel.ISupportInitialize)(this.GraphicArea)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
