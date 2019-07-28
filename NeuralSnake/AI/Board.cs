@@ -13,14 +13,14 @@ namespace NeuralSnake.AI
         public bool Dead { get; private set; }
         public Point SnakeHead => _snake[0];
 
-        private FieldType[,] _board;
-        private int _width;
-        private int _height;
-        private int _foodInterval;
-        private int _foodDensity;
-        private List<Point> _snake;
+        private readonly FieldType[,] _board;
+        private readonly int _width;
+        private readonly int _height;
+        private readonly int _foodInterval;
+        private readonly int _foodDensity;
+        private readonly List<Point> _snake;
 
-        private Random _random;
+        private readonly Random _random;
 
         public Board(int width, int height, int foodInterval, int foodDensity, int seed)
         {

@@ -17,9 +17,9 @@ namespace NeuralSnake
         public const int Neurons = 100;
         public const float Alpha = 0.5f;
 
-        private List<GameSession> _sessions;
-        private System.Timers.Timer _turnTimer;
-        private Random _random;
+        private readonly List<GameSession> _sessions;
+        private readonly System.Timers.Timer _turnTimer;
+        private readonly Random _random;
 
         private int _selectedBoard;
         private int _generation;
@@ -54,21 +54,25 @@ namespace NeuralSnake
             _turnTimer.Stop();
             if (_sessions.Count > 0)
             {
-                UpdateUI();
+                UpdateUi();
                 Redraw();
             }
 
-            for(int i=0; i<1000; i++)
-            UpdateGeneration();
+            for (int i = 0; i < 1000; i++)
+            {
+                UpdateGeneration();
+            }
             _turnTimer.Start();
         }
 
-        private void UpdateUI()
+        private void UpdateUi()
         {
             for (var i = 0; i < _sessions.Count; i++)
             {
                 var item = $"{_sessions[i].GameState}, {_sessions[i].Board.Score}";
-                Invoke(new Action(() => BoardsListBox.Items[i] = item));
+
+                var i1 = i;
+                Invoke(new Action(() => BoardsListBox.Items[i1] = item));
             }
 
             if (_sessions.Count > 0)

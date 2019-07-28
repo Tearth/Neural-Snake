@@ -5,7 +5,7 @@ namespace NeuralSnake.AI
 {
     public class NetworkOperations
     {
-        private Random _random;
+        private readonly Random _random;
 
         private const float MutationChance = 0.3f;
         private const int MaxMutationsCount = 5;
