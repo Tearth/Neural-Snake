@@ -1,4 +1,4 @@
-# NeuralSnake
+# Neural Snake
 Simple experiment on neural networks playing Snake game based on evolutionary algorithms.
 
 ![example screenshot](https://i.imgur.com/2HSsIGS.png)
